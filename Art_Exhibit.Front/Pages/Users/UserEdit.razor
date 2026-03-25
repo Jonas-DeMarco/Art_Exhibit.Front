@@ -1,0 +1,58 @@
+﻿@page "/Useredit/{id:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+
+@inject IUserService UserService
+@inject NavigationManager NavManager
+
+
+<h3>UserEdit</h3>
+@if (_user != null)
+{
+    <EditForm Model="@_user" OnValidSubmit="@HandleValidSubmit">
+        @* <FluentNumberField Name ="id" hidden Value="@_user.Id" ReadOnly/> *@
+        <div>
+            <FluentTextField Name="Username" @bind-Value="_user.Username" Label="Username" Required />
+        </div>
+        <div>
+            <FluentTextField Name="Password" @bind-Value="_user.Password" Label="Password" TextFieldType="TextFieldType.Password" Required />
+        </div>
+        <div>
+            <FluentTextField Name="Email" @bind-Value="_user.Email" Label="Email" TextFieldType="TextFieldType.Email" Required />
+        </div>
+        <div>
+            <FluentSelect Items="_typelist" Label="Type" Name="Type" @bind-Value="_user.Type" SelectedOption="@_user.Type" />
+        </div>
+
+        <div>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>        
+        </div>
+    </EditForm>
+}
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+
+    private UsersDTO? _user;
+    private IEnumerable<string>? _typelist;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _user = await UserService.GetUserAsync(id);
+        _typelist = await UserService.GetTypesAsync();
+
+    }
+
+
+    private async Task HandleValidSubmit()
+    {
+        await UserService.UpdateUserAsync(_user);
+        NavManager.NavigateTo("/Users");
+    }
+
+}

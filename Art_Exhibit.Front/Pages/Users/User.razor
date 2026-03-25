@@ -1,0 +1,38 @@
+﻿@page "/user/{id:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+
+@inject IUserService UserService
+
+
+
+@if(_user !=null)
+{
+	<h3>@_user.Username</h3>
+
+	<FluentCard Width="300px" Height="200px">
+		<ul style="list-style:none">
+			<li> Username = @_user.Username</li>
+			<li> Email = @_user.Email</li>
+			<li> Type d'utilisateur = @_user.Type</li>
+		</ul>
+	</FluentCard>
+}
+
+
+@code {
+	[Parameter]
+	public int id { get; set; }
+
+	private UsersDTO? _user;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		_user = (await UserService.GetUserAsync(id));
+
+	}
+
+}

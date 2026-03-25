@@ -1,0 +1,55 @@
+﻿@page "/createuser"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+
+@inject IUserService UserService
+@inject NavigationManager NavManager
+
+
+<h3>UserCreate</h3>
+
+<EditForm Model="@userDTO" OnValidSubmit="@HandleValidSubmit">
+    <div>
+        <FluentTextField Name="Username" @bind-Value="userDTO.Username" Label="Username" Required/>
+    </div>
+    <div>
+        <FluentTextField Name="Password" @bind-Value="userDTO.Password" Label="Password" TextFieldType="TextFieldType.Password" Required   /> 
+    </div>
+    <div>
+        <FluentTextField Name="Email" @bind-Value="userDTO.Email" Label="Email" TextFieldType="TextFieldType.Email" Required />
+    </div>
+    <div>
+        <FluentSelect Items="_typelist" Label="Type" Name="Type" @bind-Value="userDTO.Type" Placeholder="Select an option..." Required/>
+    </div>
+
+    <div>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+        <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+    </div>
+</EditForm>
+
+@code {
+
+    [SupplyParameterFromForm]
+    CreateUserDTO userDTO { get; set; } = new();
+
+    private IEnumerable<string> _typelist;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _typelist = await UserService.GetTypesAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        await UserService.CreateUserAsync(userDTO);
+        NavManager.NavigateTo("/users");
+
+    }
+}

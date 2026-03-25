@@ -8,5 +8,17 @@ namespace Art_Exhibit.Front.Application.Interfaces.Services
     public interface IUserService
     {
         Task<UsersDTO[]> GetAllUsersAsync();
+        Task<UsersDTO> GetUserAsync(int id);
+
+        Task DeleteUserAsync(int id);
+
+        Task CreateUserAsync(CreateUserDTO usersDTO);
+
+        Task UpdateUserAsync(UsersDTO usersDTO);
+
+
+
+        Task<string[]> GetTypesAsync();
+        Task<string[]> GetArtistsAsync();
     }
 }

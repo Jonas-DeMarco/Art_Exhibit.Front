@@ -1,0 +1,64 @@
+﻿@page "/createoeuvre"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+
+@inject IOeuvreService OeuvreService
+@inject IUserService UserService
+@inject NavigationManager NavManager
+
+<h3>OeuvreCreate</h3>
+<EditForm Model="@oeuvreDTO" OnValidSubmit="@HandleValidSubmit">
+    <div>
+        <FluentTextField Name="Titre" @bind-Value="oeuvreDTO.Titre" Label="Titre" Required />
+    </div>
+    <div>
+        <FluentTextField Name="Description" @bind-Value="oeuvreDTO.Description" Label="Description" Required />
+    </div>
+    <div>
+        <FluentSelect Items="_artistlist" Label="Auteur" Name="Auteur" @bind-Value="oeuvreDTO.Auteur_username" Placeholder="Select an author..." Required />
+    </div>
+    <div>
+        <FluentSelect Items="_categorylist" Label="Category" Name="Category" @bind-Value="oeuvreDTO.Categorie" Placeholder="Select a category..." Required />
+    </div>
+    <div>
+        <FluentNumberField Name="Longueur" @bind-Value="oeuvreDTO.Longueur" Label="Longueur (cm)" TValue="float"  Required />
+        <FluentNumberField Name="Largeur" @bind-Value="oeuvreDTO.Largeur" Label="Largeur (cm)" TValue="float" Required />
+        <FluentNumberField Name="Profondeur" @bind-Value="oeuvreDTO.Profondeur" Label="Profondeur (cm)" TValue="float" Required />
+    </div>
+
+    
+    
+
+    <div>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+        <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+    </div>
+</EditForm>
+
+@code {
+
+    [SupplyParameterFromForm]
+    CreateOeuvreDTO oeuvreDTO { get; set; } = new();
+
+    private IEnumerable<string> _artistlist;
+    private IEnumerable<string> _categorylist;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _artistlist = await UserService.GetArtistsAsync();
+        _categorylist = await OeuvreService.GetCategoriesAsync();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        await OeuvreService.CreateOeuvreAsync(oeuvreDTO);
+        // NavManager.NavigateTo("/users");
+
+    }
+}

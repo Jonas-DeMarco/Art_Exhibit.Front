@@ -22,7 +22,7 @@ Welcome to your new app.
 
 
 @code {
-
+	
     private UsersDTO[]? _users;
 
 	protected override async Task OnInitializedAsync()
@@ -31,4 +31,5 @@ Welcome to your new app.
 
 		_users = await UserService.GetAllUsersAsync();
 	}
+	
 }

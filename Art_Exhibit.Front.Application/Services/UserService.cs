@@ -3,6 +3,7 @@ using Art_Exhibit.Front.Application.Interfaces.HttpClients;
 using Art_Exhibit.Front.Application.Interfaces.Services;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 
 namespace Art_Exhibit.Front.Application.Services
@@ -11,5 +12,23 @@ namespace Art_Exhibit.Front.Application.Services
     {
         public async Task<UsersDTO[]> GetAllUsersAsync() =>
             await userClient.GetAllUsersAsync();
+
+        public async Task<UsersDTO> GetUserAsync(int id) =>
+            await userClient.GetUserAsync(id);
+
+        public async Task DeleteUserAsync(int id) =>
+            await userClient.DeleteUserAsync(id);
+
+        public async Task CreateUserAsync(CreateUserDTO usersDTO) =>
+            await userClient.CreateUserAsync(usersDTO);
+
+        public async Task UpdateUserAsync(UsersDTO usersDTO)=>
+            await userClient.UpdateUserAsync(usersDTO);
+
+        public async Task<string[]> GetTypesAsync() =>
+            await userClient.GetTypesAsync();
+
+        public async Task<string[]> GetArtistsAsync() =>
+            await userClient.GetArtistsAsync();
     }
 }

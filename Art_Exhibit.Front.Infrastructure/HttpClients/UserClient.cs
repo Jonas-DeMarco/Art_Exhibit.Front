@@ -11,9 +11,45 @@ namespace Art_Exhibit.Front.Infrastructure.HttpClients
     {
         public async Task<UsersDTO[]> GetAllUsersAsync()
         {
-            var result = await http.GetFromJsonAsync<UsersDTO[]>("User") ?? [];
-            return result;
+            try
+            {
+                var result = await http.GetFromJsonAsync<UsersDTO[]>("User") ?? [];
+                return result;
+            }
+            catch (Exception ex)
+            {
+
+                    throw ex;
+            }
+            
+            
         }
+
+        public async Task<UsersDTO?> GetUserAsync(int id)
+        {
+            return await http.GetFromJsonAsync<UsersDTO>($"User/{id}");
+        }
+
+        public async Task DeleteUserAsync(int id)
+        {
+            await http.DeleteAsync($"User/{id}");
+        }
+
+        public async Task CreateUserAsync(CreateUserDTO usersDTO)
+        {
+            await http.PostAsJsonAsync("User", usersDTO);
+        }
+
+        public async Task UpdateUserAsync(UsersDTO usersDTO)
+        {
+            await http.PutAsJsonAsync($"User/{usersDTO.Id}", usersDTO);
+        }
+
+        public async Task<string[]> GetTypesAsync() =>
+            await http.GetFromJsonAsync<string[]>("gettypes") ?? [];
+
+        public async Task<string[]> GetArtistsAsync()=>
+            await http.GetFromJsonAsync<string[]>("getartists") ?? [];
         
     }
 }

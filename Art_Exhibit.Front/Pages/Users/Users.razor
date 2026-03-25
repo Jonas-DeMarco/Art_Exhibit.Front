@@ -1,0 +1,84 @@
+﻿@page "/users"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+
+@inject IUserService UserService
+@inject NavigationManager NavManager
+@inject IDialogService DialogService
+
+<h3>Users</h3>
+
+
+@if(_users != null)
+{
+	<FluentDataGrid Items="@_users" RowSize="@DataGridRowSize.Medium">
+		<TemplateColumn Sortable="true">
+			<a href="/user/@context.Id">@context.Username</a>
+		</TemplateColumn>
+		<PropertyColumn Property="@(u => u.Email)" Sortable="true" />
+		<PropertyColumn Property="@(u => u.Type)" Title="Role" Sortable="true" />
+
+		<TemplateColumn>
+			<FluentButton IconEnd="@(new Icons.Regular.Size20.Edit())" Title="Edit" OnClick="@(()=>EditUser(context.Id))" />
+		</TemplateColumn>
+		<TemplateColumn>
+			<FluentButton IconEnd="@(new Icons.Regular.Size20.Delete())" Title="Delete" OnClick="@(() => DeleteUser(context.Id))" />
+		</TemplateColumn>
+	</FluentDataGrid>
+}
+<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+			  Appearance="Appearance.Accent"
+			  OnClick="@(() => CreateUser())">
+	Add User
+</FluentButton>
+
+
+
+@code {
+
+	private IQueryable<UsersDTO>? _users;
+	private int _deleteId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		_users = (await UserService.GetAllUsersAsync()).AsQueryable();
+
+	}
+
+	protected void EditUser(int id)
+	{
+		NavManager.NavigateTo($"/Useredit/{id}");
+	}
+
+	protected void CreateUser()
+	{
+		NavManager.NavigateTo("/createuser");
+	}
+
+	protected async Task DeleteUser(int id)
+	{
+		_deleteId = id;
+		await DialogService.ShowConfirmationAsync(this,
+			HandleConfirmationResult,
+			message: "Are yous sure ?",
+			title: "Confirm deletion"
+
+		);
+
+	}
+
+	private async Task HandleConfirmationResult(DialogResult result)
+	{
+		if(!result.Cancelled)
+		{
+			await UserService.DeleteUserAsync(_deleteId);	
+			NavManager.NavigateTo("/users",true);
+
+		}
+	}
+
+
+}

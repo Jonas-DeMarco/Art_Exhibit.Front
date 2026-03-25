@@ -16,6 +16,9 @@ namespace Art_Exhibit.Front.Infrastructure
             services.AddHttpClient<IUserClient, UserClient>(client =>
                 client.BaseAddress = new Uri("https://localhost:7007/api/"));
 
+            services.AddHttpClient<IOeuvreClient, OeuvreClient>(client =>
+                client.BaseAddress = new Uri("https://localhost:7007/api/"));
+
             // services.AddScoped<IProductClient, ProductClient>();
             return services;
         }
