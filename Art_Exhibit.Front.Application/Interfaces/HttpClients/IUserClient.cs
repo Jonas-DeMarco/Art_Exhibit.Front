@@ -10,6 +10,7 @@ namespace Art_Exhibit.Front.Application.Interfaces.HttpClients
         Task<UsersDTO[]> GetAllUsersAsync();
 
         Task<UsersDTO?> GetUserAsync(int id);
+        Task<UsersDTO?> GetUserByUsernameAsync(string username);
 
         Task DeleteUserAsync(int id);
 

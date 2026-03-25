@@ -15,6 +15,7 @@ namespace Art_Exhibit.Front.Application
             // Infrastructure service registrations go here
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOeuvreService, OeuvreService>();
+            services.AddScoped<IEnchereService, EnchereService>();
             return services;
         }
     }

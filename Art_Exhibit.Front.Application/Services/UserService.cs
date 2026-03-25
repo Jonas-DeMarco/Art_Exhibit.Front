@@ -15,7 +15,8 @@ namespace Art_Exhibit.Front.Application.Services
 
         public async Task<UsersDTO> GetUserAsync(int id) =>
             await userClient.GetUserAsync(id);
-
+        public async Task<UsersDTO> GetUserByUsernameAsync(string username) =>
+            await userClient.GetUserByUsernameAsync(username);
         public async Task DeleteUserAsync(int id) =>
             await userClient.DeleteUserAsync(id);
 

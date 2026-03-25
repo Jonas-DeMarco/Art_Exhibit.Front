@@ -1,0 +1,70 @@
+﻿@page "/editoeuvre/{id:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+
+@inject IOeuvreService OeuvreService
+@inject NavigationManager NavManager
+
+<h3>OeuvreEdit</h3>
+
+@if(oeuvreDTO !=null)
+{
+    <EditForm Model="@oeuvreDTO" OnValidSubmit="@HandleValidSubmit">
+        <div>
+            <FluentTextField Name="Titre" @bind-Value="oeuvreDTO.Titre" Label="Titre" Required />
+        </div>
+        <div>
+            <FluentTextField Name="Description" @bind-Value="oeuvreDTO.Description" Label="Description" Required />
+        </div>
+        <div>
+            <FluentTextField Label="Auteur" Name="Auteur" @bind-Value="oeuvreDTO.Auteur" ReadOnly Required />
+        </div>
+        <div>
+            <FluentTextField Label="Category" Name="Category" @bind-Value="oeuvreDTO.Categorie" ReadOnly Required />
+        </div>
+        <div>
+            <FluentNumberField Name="Longueur" @bind-Value="oeuvreDTO.Longueur" Label="Longueur (cm)" TValue="float" Required />
+            <FluentNumberField Name="Largeur" @bind-Value="oeuvreDTO.Largeur" Label="Largeur (cm)" TValue="float" Required />
+            <FluentNumberField Name="Profondeur" @bind-Value="oeuvreDTO.Profondeur" Label="Profondeur (cm)" TValue="float" Required />
+        </div>
+
+
+
+
+        <div>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+            <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+        </div>
+    </EditForm>
+}
+
+
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    [SupplyParameterFromForm]
+    OeuvreDTO? oeuvreDTO { get; set; } = new();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        oeuvreDTO = await OeuvreService.GetOeuvreAsync(id);
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        await OeuvreService.UpdateOeuvreAsync(oeuvreDTO);
+        // NavManager.NavigateTo("/users");
+
+    }
+}

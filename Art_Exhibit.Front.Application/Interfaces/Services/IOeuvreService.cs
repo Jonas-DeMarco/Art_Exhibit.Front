@@ -9,7 +9,12 @@ namespace Art_Exhibit.Front.Application.Interfaces.Services
     {
         Task CreateOeuvreAsync(CreateOeuvreDTO oeuvreDTO);
 
+        Task<OeuvreDTO?> GetOeuvreAsync(int id);
 
+        Task UpdateOeuvreAsync(OeuvreDTO oeuvreDTO);
+        Task DeleteOeuvreAsync(int id);
+
+        Task<OeuvreDTO[]?> GetAllOeuvreAsync();
 
         Task<string[]> GetCategoriesAsync();
     }

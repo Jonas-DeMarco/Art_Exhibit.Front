@@ -1,4 +1,5 @@
 ﻿@page "/user/{id:int}"
+@page "/user/{username}"
 @using Art_Exhibit.Front.Application.DTOs
 @using Art_Exhibit.Front.Application.Interfaces.Services
 @using Microsoft.FluentUI.AspNetCore.Components
@@ -17,13 +18,16 @@
 			<li> Email = @_user.Email</li>
 			<li> Type d'utilisateur = @_user.Type</li>
 		</ul>
+
 	</FluentCard>
 }
 
 
 @code {
 	[Parameter]
-	public int id { get; set; }
+	public int? id { get; set; }
+	[Parameter]
+	public string? username { get; set; }
 
 	private UsersDTO? _user;
 
@@ -31,7 +35,9 @@
 	{
 		await base.OnInitializedAsync();
 
-		_user = (await UserService.GetUserAsync(id));
+
+		if(id !=null ) _user = (await UserService.GetUserAsync(id.Value));
+		if(username != null)_user = (await UserService.GetUserByUsernameAsync(username));
 
 	}
 

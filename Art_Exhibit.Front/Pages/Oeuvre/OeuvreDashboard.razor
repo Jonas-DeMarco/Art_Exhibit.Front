@@ -1,0 +1,129 @@
+﻿@page "/dashboardoeuvre"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+
+@inject NavigationManager NavManager
+@inject IOeuvreService OeuvreService
+@inject IDialogService DialogService
+
+
+<h3>Dashboard</h3>
+
+@if (_oeuvres != null)
+{
+	<FluentDataGrid Items="@_oeuvres" Style="width:100%;" AutoFit="true" RowSize="DataGridRowSize.Medium">
+		<TemplateColumn Sortable="true" Title="Titre">
+			<a href="/oeuvre/@context.Id">@context.Titre</a>
+		</TemplateColumn>
+
+		<PropertyColumn Property="@(o => o.Description)" />
+
+		<TemplateColumn Sortable="true" Title ="Auteur">
+			<a href="/user/@context.Auteur">@context.Auteur</a>
+		</TemplateColumn>
+
+		<PropertyColumn Property="@(o => o.IsAuthentified)" />
+		<PropertyColumn Property="@(o => o.Statut)" />
+		
+
+		<TemplateColumn>
+			<FluentButton IconEnd="@(new Icons.Regular.Size12.CheckmarkCircle())"
+						  Title="ToggleAuthenticate"
+						  OnClick="@(() => ToggleAuthenticate(context))">
+				ToggleAuthenticate
+			</FluentButton>
+		</TemplateColumn>
+
+		<TemplateColumn>
+			<FluentButton IconEnd="@(new Icons.Regular.Size12.CheckmarkCircle())" 
+						  Title="Validate" 
+						  OnClick="@(() => UpdateStatus(context,"Accepted"))" > 
+						  Validate 
+			</FluentButton>
+			<FluentButton IconEnd="@(new Icons.Regular.Size12.Prohibited())"
+						  Title="Refuse"
+						  OnClick="@(() => UpdateStatus(context,"Refused"))">
+						  Refuse
+			</FluentButton>
+		</TemplateColumn>
+
+
+		<TemplateColumn>
+			<FluentButton IconEnd="@(new Icons.Regular.Size20.Edit())" Title="Edit" OnClick="@(() => EditOeuvre(context.Id))" />
+		</TemplateColumn>
+		<TemplateColumn>
+			<FluentButton IconEnd="@(new Icons.Regular.Size20.Delete())" Title="Delete" OnClick="@(() => DeleteOeuvre(context.Id))" />
+		</TemplateColumn>
+	</FluentDataGrid>
+}
+<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+			  Appearance="Appearance.Accent"
+			  OnClick="@(() => CreateOeuvre())">
+	Add Oeuvre
+</FluentButton>
+
+@code {
+
+	private UsersDTO[]? _users;
+	private IQueryable<OeuvreDTO>? _oeuvres;
+	private int _deleteId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		_oeuvres = (await OeuvreService.GetAllOeuvreAsync()).AsQueryable();
+	}
+
+	public async Task CreateOeuvre()
+	{
+		NavManager.NavigateTo("/createoeuvre");
+	}
+
+	protected void EditOeuvre(int id)
+	{
+		NavManager.NavigateTo($"/editoeuvre/{id}");
+	}
+
+
+	protected async Task DeleteOeuvre(int id)
+	{
+		_deleteId = id;
+		await DialogService.ShowConfirmationAsync(this,
+			HandleConfirmationResult,
+			message: "Are yous sure ?",
+			title: "Confirm deletion"
+
+		);
+
+	}
+
+	private async Task HandleConfirmationResult(DialogResult result)
+	{
+		if (!result.Cancelled)
+		{
+			await OeuvreService.DeleteOeuvreAsync(_deleteId);
+			NavManager.NavigateTo("/", true);
+
+		}
+	}
+
+	private async Task UpdateStatus(OeuvreDTO oeuvreDTO,string status)
+	{
+		oeuvreDTO.Statut = status;
+		await OeuvreService.UpdateOeuvreAsync(oeuvreDTO);
+		NavManager.Refresh(true);
+
+
+	}
+
+	private async Task ToggleAuthenticate(OeuvreDTO oeuvreDTO)
+	{
+		oeuvreDTO.IsAuthentified = !oeuvreDTO.IsAuthentified;
+		await OeuvreService.UpdateOeuvreAsync(oeuvreDTO);
+		NavManager.Refresh(true);
+	}
+
+}

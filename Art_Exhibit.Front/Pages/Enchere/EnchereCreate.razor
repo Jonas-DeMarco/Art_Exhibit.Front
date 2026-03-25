@@ -1,0 +1,66 @@
+﻿@page "/puttoauction/{id:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+
+@inject IEnchereService EnchereService
+@inject IOeuvreService OeuvreService
+@inject NavigationManager NavManager
+
+<h3>EnchereCreate</h3>
+<EditForm Model="@enchereDTO" OnValidSubmit="@HandleValidSubmit">
+    <div>
+        <FluentTextField Name="Oeuvre" Label="Titre" Required />
+    </div>
+    <div>
+        <FluentDatePicker Value="@_date.ToDateTime()" ValueChanged="@(e => _date = e.ToDateOnly())" />
+        <FluentTimePicker Value="@_time.ToDateTime()" ValueChanged="@(e => _time = e.ToTimeOnly())" />
+    </div>
+    <div>
+        <FluentNumberField Name="Longueur" @bind-Value="enchereDTO.Prix_reserve" Label="prix de reserve" TValue="float" Required />
+        <FluentNumberField Name="Largeur" @bind-Value="enchereDTO.Incr_mini" Label="increment minimal" TValue="float" Required />
+        <FluentNumberField Name="Profondeur" @bind-Value="enchereDTO.Duree_antisniping" Label="durée de l'anti-sniping (s)" TValue="int" Required />
+    </div>
+
+
+
+
+    <div>
+        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+        <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+    </div>
+</EditForm>
+
+@code {
+    [Parameter]
+    public int id{ get; set; }
+    [SupplyParameterFromForm]
+    CreateEnchereDTO enchereDTO { get; set; } = new();
+
+    private OeuvreDTO _oeuvreDTO;
+    private DateOnly _date = DateOnly.FromDateTime(DateTime.Now);
+    private TimeOnly _time = TimeOnly.FromDateTime(DateTime.Now);
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _oeuvreDTO = await OeuvreService.GetOeuvreAsync(id);
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        enchereDTO.Date_debut = new DateTime(_date, _time);
+        enchereDTO.Oeuvreid = _oeuvreDTO.Id;
+
+
+        await EnchereService.CreateEnchereAsync(enchereDTO);
+        // NavManager.NavigateTo("/users");
+
+    }
+}

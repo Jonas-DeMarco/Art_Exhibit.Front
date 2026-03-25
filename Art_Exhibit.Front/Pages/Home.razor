@@ -1,35 +1,49 @@
 ﻿@page "/"
 @using Art_Exhibit.Front.Application.DTOs
 @using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
 
 @inject IUserService UserService
+@inject IOeuvreService OeuvreService
+
 
 <PageTitle>Home</PageTitle>
 
 <h1>Hello, world!</h1>
 
-@if (_users != null)
+@if (_oeuvres != null)
 {
-	<ul>
-		@foreach (var user in _users)
+	<h2>Artwork List : </h2>
+	<div style="display :flex">
+		@foreach (var oeuvre in _oeuvres)
 		{
-			<li>@user.Username</li>
+			<FluentCard Width="300px" Height="300px">
+				<p>@oeuvre.Titre</p>
+				<p>@oeuvre.Description</p>
+				<p>
+					<FluentIcon Value="@(new Icons.Regular.Size24.PaintBrush())" />
+					<a href="user/@oeuvre.Auteur">@oeuvre.Auteur</a>
+				</p>
+			</FluentCard>
 		}
-	</ul>
+	</div>
 }
 
 Welcome to your new app.
 
 
 @code {
-	
-    private UsersDTO[]? _users;
+
+	private UsersDTO[]? _users;
+	private OeuvreDTO[]? _oeuvres;
 
 	protected override async Task OnInitializedAsync()
 	{
 		await base.OnInitializedAsync();
 
 		_users = await UserService.GetAllUsersAsync();
+		_oeuvres = await OeuvreService.GetAllOeuvreAsync();
 	}
 	
 }

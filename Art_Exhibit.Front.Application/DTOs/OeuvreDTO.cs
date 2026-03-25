@@ -11,10 +11,6 @@ namespace Art_Exhibit.Front.Application.DTOs
 
         public string Categorie { get; set; }
 
-        public int Exemplaire { get; set; } = 1;
-
-        public int Nbre_exemplaire { get; set; } = 1;
-
         public bool IsAuthentified { get; set; } = false;
 
         public string Titre { get; set; }

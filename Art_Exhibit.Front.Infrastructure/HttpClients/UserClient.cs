@@ -30,6 +30,9 @@ namespace Art_Exhibit.Front.Infrastructure.HttpClients
             return await http.GetFromJsonAsync<UsersDTO>($"User/{id}");
         }
 
+        public async Task<UsersDTO?> GetUserByUsernameAsync(string username) =>
+            await http.GetFromJsonAsync<UsersDTO>($"User/{username}");
+
         public async Task DeleteUserAsync(int id)
         {
             await http.DeleteAsync($"User/{id}");

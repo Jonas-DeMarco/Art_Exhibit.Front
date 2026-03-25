@@ -1,0 +1,83 @@
+﻿@page "/oeuvre/{id:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+
+@inject IOeuvreService OeuvreService
+@inject NavigationManager NavManager
+
+
+
+@if (_oeuvre != null)
+{
+	<h3>@_oeuvre.Titre</h3>
+
+	<FluentCard Width="300px" Height="200px">
+		<ul style="list-style:none">
+			<li> Titre = @_oeuvre.Titre</li>
+			<li> Description = @_oeuvre.Description</li>
+			<li> Auteur = @_oeuvre.Auteur</li>
+			<li> Categorie = @_oeuvre.Categorie </li>
+			<li> Dimensions = @_oeuvre.Longueur x @_oeuvre.Largeur cm  </li>
+		</ul>
+		
+		<div style="background-color = @_color; width = 100%">
+			<strong>@_oeuvre.Statut</strong>
+		</div>
+	</FluentCard>
+	<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+				  Appearance="Appearance.Accent"
+				  OnClick="@(() => ToCreateAuction())">
+		Put To Auction
+	</FluentButton>
+}
+
+
+@code {
+	[Parameter]
+	public int id { get; set; }
+
+	private string _color;
+
+	private OeuvreDTO? _oeuvre;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+
+		if (id != null) _oeuvre = await OeuvreService.GetOeuvreAsync(id);
+
+		if (_oeuvre != null)
+		{
+			@switch (_oeuvre.Statut)
+			{
+				case "Waiting":
+					_color = "yellow";
+					break;
+				case "Refused":
+					_color = "red";
+					break;
+				case "Accepted":
+					_color = "red";
+					break;
+				case "Up for Auction":
+					_color = "red";
+					break;
+				case "Sold":
+					_color = "red";
+					break;
+				default:
+					break;
+			}
+		}
+
+	}
+
+
+	private async Task ToCreateAuction()
+	{
+		NavManager.NavigateTo($"puttoauction/{id}");
+	}
+
+}
