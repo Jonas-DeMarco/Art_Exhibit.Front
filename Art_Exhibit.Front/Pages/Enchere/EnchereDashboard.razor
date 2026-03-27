@@ -1,0 +1,131 @@
+﻿@page "/dashboardenchere"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+@using System.Timers
+
+@inject NavigationManager NavManager
+@inject IEnchereService EnchereService
+@inject IOeuvreService OeuvreService
+@inject IDialogService DialogService
+
+
+<h3>Dashboard</h3>
+
+@if (_oeuvres != null)
+{
+	<FluentDataGrid Items="@_encheres" Style="width:100%;" AutoFit="true" RowSize="DataGridRowSize.Medium">
+		<TemplateColumn Sortable="true" Title="Oeuvre">
+			<a href="/oeuvre/@context.OeuvreId">@_oeuvres.Where(o=> o.Id == @context.OeuvreId).First().Titre</a>
+		</TemplateColumn>
+
+		<PropertyColumn Property="@(e => e.Date_debut)" />
+		<PropertyColumn Property="@(e => e.Date_fin)" />
+		<PropertyColumn Property="@(e => e.Duree_antisniping)" />
+
+
+		<TemplateColumn Title="Temps restant">
+			<div>@_time[context.OeuvreId.Value]</div>
+		</TemplateColumn>
+
+		
+
+
+		<TemplateColumn Width="10%">
+			<FluentButton IconEnd="@(new Icons.Regular.Size20.Edit())" Title="Edit" OnClick="@(() => EditEnchere(context.Id.Value))" />
+		
+			<FluentButton IconEnd="@(new Icons.Regular.Size20.Delete())" Title="Delete" OnClick="@(() => DeleteEnchere(context.Id.Value))" />
+		</TemplateColumn>
+	</FluentDataGrid>
+}
+
+
+@code {
+
+	private UsersDTO[]? _users;
+	private IQueryable<OeuvreDTO>? _oeuvres;
+	private IQueryable<EnchereDTO>? _encheres;
+	private Dictionary<int, TimeSpan> _time = new Dictionary<int, TimeSpan>();
+	private Timer _timer;
+	private int _deleteId;
+
+	protected override async Task OnInitializedAsync()
+	{
+		await base.OnInitializedAsync();
+
+		_oeuvres = (await OeuvreService.GetAllOeuvreAsync()).AsQueryable();
+		_encheres = (await EnchereService.GetAllEnchereAsync()).AsQueryable();
+
+		if(_encheres != null)
+		{
+			foreach (var enchere in _encheres)
+			{
+				var timetilfinish = (enchere.Date_fin - enchere.Date_debut);
+				_time.Add(enchere.Id.Value, timetilfinish.Value);
+			}
+		}
+
+
+		_timer = new Timer(2000);
+		_timer.Elapsed += Countdown;
+	}
+
+
+
+	protected void EditEnchere(int id)
+	{
+		NavManager.NavigateTo($"/editenchere/{id}");
+	}
+
+
+	protected async Task DeleteEnchere(int id)
+	{
+		_deleteId = id;
+		await DialogService.ShowConfirmationAsync(this,
+			HandleConfirmationResult,
+			message: "Are yous sure ?",
+			title: "Confirm deletion"
+
+		);
+
+	}
+
+	private async Task HandleConfirmationResult(DialogResult result)
+	{
+		if (!result.Cancelled)
+		{
+			await EnchereService.DeleteEnchereAsync(_deleteId);
+			NavManager.Refresh(true);
+
+		}
+	}
+
+	private async Task UpdateStatus(OeuvreDTO oeuvreDTO, string status)
+	{
+		// oeuvreDTO.Statut = status;
+		// await OeuvreService.UpdateOeuvreAsync(oeuvreDTO);
+		// NavManager.Refresh(true);
+
+
+	}
+
+	private async Task ToggleAuthenticate(OeuvreDTO oeuvreDTO)
+	{
+		oeuvreDTO.IsAuthentified = !oeuvreDTO.IsAuthentified;
+		await OeuvreService.UpdateOeuvreAsync(oeuvreDTO);
+		NavManager.Refresh(true);
+	}
+
+
+	public void Countdown(Object source, System.Timers.ElapsedEventArgs e)
+	{
+		foreach (int key in _time.Keys)
+		{
+			_time[key].Subtract(TimeSpan.FromSeconds(1));
+			InvokeAsync(StateHasChanged);
+		}
+		
+	}
+
+}

@@ -6,20 +6,53 @@
 
 @inject IUserService UserService
 @inject IOeuvreService OeuvreService
+@inject IOffreService OffreService
+@inject IEnchereService EnchereService
+@inject NavigationManager NavManager
 
 
 <PageTitle>Home</PageTitle>
 
-<h1>Hello, world!</h1>
+
+
+@if (_oeuvres != null)
+{
+	<h2>Auction List : </h2>
+	<div style="display :flex;flex-wrap:wrap; width : 100%">
+		@foreach (var enchere in _encheres)
+		{
+			<FluentCard Width="300px" Height="300px">
+				<p><a href="user/@enchere.OeuvreId">@_oeuvres.Where(e=> e.Id == enchere.OeuvreId).First().Titre</a></p>
+				<p>@_oeuvres.Where(e=> e.Id == enchere.OeuvreId).First().Description</p>
+				<p>
+					<FluentIcon Value="@(new Icons.Regular.Size24.PaintBrush())" />
+					<a href="user/@_oeuvres.Where(e => e.Id == enchere.OeuvreId).First().Auteur">@_oeuvres.Where(e => e.Id == enchere.OeuvreId).First().Auteur</a>
+				</p>
+				<p>
+					Last bid : @(_lastbids[enchere.Id.Value])
+				</p>
+				<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+							  Appearance="Appearance.Accent"
+							  OnClick="@(() => ToCreateOffer(enchere.Id.Value))">
+					Ajouter une offre
+				</FluentButton>
+			</FluentCard>
+		}
+	</div>
+}
+
+
+
+
 
 @if (_oeuvres != null)
 {
 	<h2>Artwork List : </h2>
-	<div style="display :flex">
+	<div style="display :flex;flex-wrap:wrap; width : 100%">
 		@foreach (var oeuvre in _oeuvres)
 		{
 			<FluentCard Width="300px" Height="300px">
-				<p>@oeuvre.Titre</p>
+				<p><a href="user/@oeuvre.Id">@oeuvre.Titre</a></p>
 				<p>@oeuvre.Description</p>
 				<p>
 					<FluentIcon Value="@(new Icons.Regular.Size24.PaintBrush())" />
@@ -30,13 +63,15 @@
 	</div>
 }
 
-Welcome to your new app.
 
 
 @code {
 
 	private UsersDTO[]? _users;
 	private OeuvreDTO[]? _oeuvres;
+	private EnchereDTO[]? _encheres;
+
+	private Dictionary<int, float> _lastbids = new Dictionary<int, float>();
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -44,6 +79,26 @@ Welcome to your new app.
 
 		_users = await UserService.GetAllUsersAsync();
 		_oeuvres = await OeuvreService.GetAllOeuvreAsync();
+		_encheres = await EnchereService.GetAllEnchereAsync();
+		if(_encheres != null)
+		{
+			foreach(var enchere in _encheres)
+			{
+				var bidvalue = await OffreService.GetLastBid(enchere.Id.Value);
+				_lastbids.Add(enchere.Id.Value, bidvalue.Price);
+			}
+		}
 	}
-	
+
+	private async Task<float> GetLastbid(int enchereid)
+	{
+		var result = await OffreService.GetLastBid(enchereid);
+		return result.Price;
+	}
+
+	private async Task ToCreateOffer(int enchereid)
+	{
+		
+		NavManager.NavigateTo($"createoffre/{enchereid}");
+	}
 }

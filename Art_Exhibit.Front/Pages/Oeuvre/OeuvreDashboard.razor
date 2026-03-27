@@ -18,8 +18,6 @@
 			<a href="/oeuvre/@context.Id">@context.Titre</a>
 		</TemplateColumn>
 
-		<PropertyColumn Property="@(o => o.Description)" />
-
 		<TemplateColumn Sortable="true" Title ="Auteur">
 			<a href="/user/@context.Auteur">@context.Auteur</a>
 		</TemplateColumn>
@@ -52,8 +50,7 @@
 
 		<TemplateColumn>
 			<FluentButton IconEnd="@(new Icons.Regular.Size20.Edit())" Title="Edit" OnClick="@(() => EditOeuvre(context.Id))" />
-		</TemplateColumn>
-		<TemplateColumn>
+		
 			<FluentButton IconEnd="@(new Icons.Regular.Size20.Delete())" Title="Delete" OnClick="@(() => DeleteOeuvre(context.Id))" />
 		</TemplateColumn>
 	</FluentDataGrid>
@@ -105,7 +102,7 @@
 		if (!result.Cancelled)
 		{
 			await OeuvreService.DeleteOeuvreAsync(_deleteId);
-			NavManager.NavigateTo("/", true);
+			NavManager.Refresh(true);
 
 		}
 	}

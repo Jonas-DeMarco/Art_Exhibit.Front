@@ -20,5 +20,7 @@ namespace Art_Exhibit.Front.Application.Interfaces.Services
 
         Task<string[]> GetTypesAsync();
         Task<string[]> GetArtistsAsync();
+
+        Task<string[]> GetAllUsernameAsync();
     }
 }

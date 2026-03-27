@@ -1,0 +1,107 @@
+﻿@page "/createoffre/{enchereid:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
+
+@inject IOffreService OffreService
+@inject IEnchereService EnchereService
+@inject IOeuvreService OeuvreService
+@inject IUserService UserService
+@inject NavigationManager NavManager
+
+
+
+<h3>OffreCreate</h3>
+
+@if(_oeuvreDTO != null)
+{
+    <EditForm Model="@offreDTO" OnValidSubmit="@HandleValidSubmit">
+        <div>
+            <FluentTextField Name="Titre" @bind-Value="_oeuvreDTO.Titre" Label="Titre" Required ReadOnly/>
+        </div>
+        <div>
+            <FluentNumberField Name="Montant" @bind-Value="_price" Label="Prix" TValue="float" Min="@(_minprice.ToString())" Required />
+        </div>
+        <div>
+            <FluentSelect Items="_userslist" @bind-Value="_biddername" Label="Bidder" Name="Auteur" Placeholder="Select a bidder ..." Required />
+        </div>
+
+
+
+
+
+        <div>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+            <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+        </div>
+    </EditForm>
+}
+
+
+
+@code {
+
+    [Parameter]
+    public int enchereid { get; set; }
+    [SupplyParameterFromForm]
+    CreateOffreDTO offreDTO { get; set; } = new();
+
+
+    private EnchereDTO? _enchereDTO;
+    private OeuvreDTO? _oeuvreDTO;
+
+    private OffreDTO? _lastbid;
+
+    private string _biddername;
+
+    private IEnumerable<string> _userslist;
+
+    private float _minprice;
+    private float _price;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _enchereDTO = await EnchereService.GetEnchereAsync(enchereid);
+        if (_enchereDTO != null)
+        { 
+            _oeuvreDTO = await OeuvreService.GetOeuvreAsync(_enchereDTO.OeuvreId.Value);
+            _lastbid = await OffreService.GetLastBid(_enchereDTO.Id.Value);
+            if (_lastbid != null)
+            {
+                _minprice = _lastbid.Price;
+            }
+            else
+            {
+                _minprice = _enchereDTO.Prix_reserve.Value;
+            }
+            _minprice = _minprice + _enchereDTO.Incr_mini.Value;
+            _price = _minprice;
+
+
+        }
+
+        _userslist = await UserService.GetAllUsernameAsync();
+
+    }
+
+
+
+    private async Task HandleValidSubmit()
+    {
+        int returnid = _oeuvreDTO.Id;
+
+
+        offreDTO.Timestamp = DateTime.Now;
+        offreDTO.Bidder_Id = (await UserService.GetUserByUsernameAsync(_biddername)).Id;
+        offreDTO.Enchere_Id = enchereid;
+        offreDTO.Price = _price;
+        await OffreService.CreateOffreAsync(offreDTO);
+        NavManager.NavigateTo($"/oeuvre/{returnid}");
+
+    }
+
+}

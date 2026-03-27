@@ -1,0 +1,94 @@
+﻿@page "/editenchere/{id:int}"
+@using Art_Exhibit.Front.Application.DTOs
+@using Art_Exhibit.Front.Application.Interfaces.Services
+@using Microsoft.FluentUI.AspNetCore.Components
+@using Microsoft.FluentUI.AspNetCore.Components.Extensions
+@using System.Threading.Tasks
+
+@inject IOeuvreService OeuvreService
+@inject IEnchereService EnchereService
+@inject NavigationManager NavManager
+
+<h3>OeuvreEdit</h3>
+@if(enchereDTO !=null)
+{
+    @if (_oeuvreDTO != null)
+    {
+        <EditForm Model="@enchereDTO" OnValidSubmit="@HandleValidSubmit">
+            <div>
+                <FluentTextField Name="Oeuvre" Label="Oeuvre" Value="@_oeuvreDTO.Titre" ReadOnly Required />
+            </div>
+            <div>
+                <FluentDatePicker Value="@_date1.ToDateTime()" ValueChanged="@(e => _date1 = e.ToDateOnly())" ReadOnly />
+                <FluentTimePicker Value="@_time1.ToDateTime()" ValueChanged="@(e => _time1 = e.ToTimeOnly())" ReadOnly />
+            </div>
+            <div>
+                <FluentDatePicker Value="@_date2.ToDateTime()" ValueChanged="@(e => _date2 = e.ToDateOnly())"  />
+                <FluentTimePicker Value="@_time2.ToDateTime()" ValueChanged="@(e => _time2 = e.ToTimeOnly())"  />
+            </div>
+            <div>
+                <FluentNumberField Name="Longueur" @bind-Value="enchereDTO.Prix_reserve" Label="prix de reserve" TValue="float?" Required />
+                <FluentNumberField Name="Largeur" @bind-Value="enchereDTO.Incr_mini" Label="increment minimal" TValue="float?" Required />
+                <FluentNumberField Name="Profondeur" @bind-Value="enchereDTO.Duree_antisniping" Label="durée de l'anti-sniping (s)" TValue="int?" Required />
+            </div>
+
+
+
+
+            <div>
+                <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+                <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+            </div>
+        </EditForm>
+    }
+}
+
+
+
+@code {
+    [Parameter]
+    public int id { get; set; }
+    [SupplyParameterFromForm]
+    EnchereDTO enchereDTO { get; set; } = new();
+
+
+    private DateOnly _date1;
+    private TimeOnly _time1;
+
+    private DateOnly _date2;
+    private TimeOnly _time2;
+
+    private OeuvreDTO _oeuvreDTO;
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+
+        _oeuvreDTO = await OeuvreService.GetOeuvreAsync(id);
+        enchereDTO = await EnchereService.GetEnchereAsync(id);
+
+        if (enchereDTO != null)
+        {
+            _date1 = DateOnly.FromDateTime(enchereDTO.Date_debut.Value);
+            _time1 = TimeOnly.FromDateTime(enchereDTO.Date_debut.Value);
+
+            _date2 = DateOnly.FromDateTime(enchereDTO.Date_fin.Value);
+            _time2 = TimeOnly.FromDateTime(enchereDTO.Date_fin.Value);
+        }
+
+    }
+
+    private async Task HandleValidSubmit()
+    {
+
+        enchereDTO.Date_debut = new DateTime(_date1, _time1);
+        enchereDTO.Date_fin = new DateTime(_date2, _time2);
+
+        await EnchereService.UpdateEnchereAsync(enchereDTO, id  );
+        NavManager.NavigateTo("/dashboardenchere");
+
+    }
+}
+
+

@@ -16,6 +16,7 @@ namespace Art_Exhibit.Front.Application
             services.AddScoped<IUserService, UserService>();
             services.AddScoped<IOeuvreService, OeuvreService>();
             services.AddScoped<IEnchereService, EnchereService>();
+            services.AddScoped<IOffreService, OffreService>();
             return services;
         }
     }

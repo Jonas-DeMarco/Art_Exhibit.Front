@@ -10,28 +10,32 @@
 @inject NavigationManager NavManager
 
 <h3>EnchereCreate</h3>
-<EditForm Model="@enchereDTO" OnValidSubmit="@HandleValidSubmit">
-    <div>
-        <FluentTextField Name="Oeuvre" Label="Titre" Required />
-    </div>
-    <div>
-        <FluentDatePicker Value="@_date.ToDateTime()" ValueChanged="@(e => _date = e.ToDateOnly())" />
-        <FluentTimePicker Value="@_time.ToDateTime()" ValueChanged="@(e => _time = e.ToTimeOnly())" />
-    </div>
-    <div>
-        <FluentNumberField Name="Longueur" @bind-Value="enchereDTO.Prix_reserve" Label="prix de reserve" TValue="float" Required />
-        <FluentNumberField Name="Largeur" @bind-Value="enchereDTO.Incr_mini" Label="increment minimal" TValue="float" Required />
-        <FluentNumberField Name="Profondeur" @bind-Value="enchereDTO.Duree_antisniping" Label="durée de l'anti-sniping (s)" TValue="int" Required />
-    </div>
+@if(_oeuvreDTO != null)
+{
+    <EditForm Model="@enchereDTO" OnValidSubmit="@HandleValidSubmit">
+        <div>
+            <FluentTextField Name="Oeuvre" Label="Oeuvre" Value="@_oeuvreDTO.Titre" ReadOnly Required />
+        </div>
+        <div>
+            <FluentDatePicker Value="@_date.ToDateTime()" ValueChanged="@(e => _date = e.ToDateOnly())" />
+            <FluentTimePicker Value="@_time.ToDateTime()" ValueChanged="@(e => _time = e.ToTimeOnly())" />
+        </div>
+        <div>
+            <FluentNumberField Name="Prix_reserve" @bind-Value="enchereDTO.Prix_reserve" Label="prix de reserve" TValue="float" Required />
+            <FluentNumberField Name="Incr_mini" @bind-Value="enchereDTO.Incr_mini" Label="increment minimal" TValue="float" Required />
+            <FluentNumberField Name="Duree_antisniping" @bind-Value="enchereDTO.Duree_antisniping" Label="durée de l'anti-sniping (s)" TValue="int" Required />
+        </div>
 
 
 
 
-    <div>
-        <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
-        <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
-    </div>
-</EditForm>
+        <div>
+            <FluentButton Type="ButtonType.Submit" Appearance="Appearance.Accent"> Submit </FluentButton>
+            <FluentButton Type="ButtonType.Reset"> Reset </FluentButton>
+        </div>
+    </EditForm>
+}
+
 
 @code {
     [Parameter]
@@ -60,7 +64,7 @@
 
 
         await EnchereService.CreateEnchereAsync(enchereDTO);
-        // NavManager.NavigateTo("/users");
+        NavManager.NavigateTo("/");
 
     }
 }

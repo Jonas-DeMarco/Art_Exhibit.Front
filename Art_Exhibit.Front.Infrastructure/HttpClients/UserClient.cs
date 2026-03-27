@@ -27,7 +27,7 @@ namespace Art_Exhibit.Front.Infrastructure.HttpClients
 
         public async Task<UsersDTO?> GetUserAsync(int id)
         {
-            return await http.GetFromJsonAsync<UsersDTO>($"User/{id}");
+            return await http.GetFromJsonAsync<UsersDTO>($"User/{id}") ?? null;
         }
 
         public async Task<UsersDTO?> GetUserByUsernameAsync(string username) =>
@@ -53,6 +53,9 @@ namespace Art_Exhibit.Front.Infrastructure.HttpClients
 
         public async Task<string[]> GetArtistsAsync()=>
             await http.GetFromJsonAsync<string[]>("getartists") ?? [];
+        public async Task<string[]> GetAllUsernameAsync() =>
+            await http.GetFromJsonAsync<string[]>("getusernames") ?? [];
         
+
     }
 }

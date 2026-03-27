@@ -31,5 +31,8 @@ namespace Art_Exhibit.Front.Application.Services
 
         public async Task<string[]> GetArtistsAsync() =>
             await userClient.GetArtistsAsync();
+
+        public async Task<string[]> GetAllUsernameAsync() =>
+            await userClient.GetAllUsernameAsync();
     }
 }

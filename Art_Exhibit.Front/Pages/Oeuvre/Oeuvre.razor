@@ -2,8 +2,12 @@
 @using Art_Exhibit.Front.Application.DTOs
 @using Art_Exhibit.Front.Application.Interfaces.Services
 @using Microsoft.FluentUI.AspNetCore.Components
+@using System.Threading.Tasks
 
 @inject IOeuvreService OeuvreService
+@inject IEnchereService EnchereService
+@inject IOffreService OffreService
+@inject IUserService UserService
 @inject NavigationManager NavManager
 
 
@@ -25,11 +29,49 @@
 			<strong>@_oeuvre.Statut</strong>
 		</div>
 	</FluentCard>
-	<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
-				  Appearance="Appearance.Accent"
-				  OnClick="@(() => ToCreateAuction())">
-		Put To Auction
-	</FluentButton>
+	@if (_enchere.Id == 0 && (_oeuvre.Statut=="Accepted" || _oeuvre.Statut=="Sold"))
+	{
+		<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+					  Appearance="Appearance.Accent"
+					  OnClick="@(() => ToCreateAuction())">
+			Put To Auction
+		</FluentButton>
+	}
+	@if (_enchere.Id != 0)
+	{
+		<FluentCard>
+			<div>
+				Temps restant :
+				@((_enchere.Date_fin - _enchere.Date_debut).Value.Days) Jours
+				@((_enchere.Date_fin - _enchere.Date_debut).Value.Hours) Heures
+				@((_enchere.Date_fin - _enchere.Date_debut).Value.Minutes) Minutes
+				@((_enchere.Date_fin - _enchere.Date_debut).Value.Seconds) Secondes
+			</div>
+		
+		@if (_offres != null)
+		{
+			<FluentDataGrid Items="@_offres" Style="width:50%;" AutoFit="true" RowSize="DataGridRowSize.Medium">
+				
+				<TemplateColumn Title="Offreur">
+					<a href="/user/@context.BidderId">@_bidders.Where(b => b.Id == @context.BidderId).First().Username</a>
+				</TemplateColumn>
+				
+				<PropertyColumn Property="@(o => o.Price)"/>
+				<PropertyColumn Property="@(o => o.Timestamp )" />
+
+
+			</FluentDataGrid>
+			
+		}
+			<FluentButton IconStart="@(new Icons.Regular.Size16.Add())"
+						  Appearance="Appearance.Accent"
+						  OnClick="@(() => ToCreateOffer())">
+				Ajouter une offre
+			</FluentButton>
+		</FluentCard>
+	}
+
+	
 }
 
 
@@ -40,6 +82,10 @@
 	private string _color;
 
 	private OeuvreDTO? _oeuvre;
+	private IQueryable<UsersDTO?> _bidders = Enumerable.Empty<UsersDTO?>().AsQueryable();
+
+	private EnchereDTO? _enchere;
+	private IQueryable<OffreDTO?> _offres;
 
 	protected override async Task OnInitializedAsync()
 	{
@@ -72,12 +118,38 @@
 			}
 		}
 
+		_enchere = await EnchereService.GetEnchereByArtworkAsync(id);
+		if (_enchere.Id != 0)
+		{
+			_offres = (await OffreService.GetBids(_enchere.Id.Value)).AsQueryable();
+			if (_offres != null)
+			{
+				List<UsersDTO> result = new List<UsersDTO>();
+
+				foreach (var bid in _offres)
+				{
+					var bidder = await UserService.GetUserAsync(bid.BidderId);
+					result.Add(bidder);
+
+				}
+				_bidders = result.AsQueryable<UsersDTO?>();
+			}
+		}
+
 	}
+
+
 
 
 	private async Task ToCreateAuction()
 	{
 		NavManager.NavigateTo($"puttoauction/{id}");
+	}
+
+	private async Task ToCreateOffer()
+	{
+		var enchereid = _enchere.Id;
+		NavManager.NavigateTo($"createoffre/{enchereid}");
 	}
 
 }
